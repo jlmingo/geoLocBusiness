@@ -1,14 +1,9 @@
-from pymongo import MongoClient
 import pandas as pd
 import re
+import geopandas as gpd
+from src.functions import connectCollection, getLocation, df_to_gdf
 
 #Import MongoDB collection and create DataFrame
-
-def connectCollection(database, collection):
-    client = MongoClient()
-    db = client[database]
-    coll = db[collection]
-    return db, coll
 
 db, coll = connectCollection('companies','companies')
 
@@ -18,7 +13,7 @@ pipeline = [
 
 results = list(coll.aggregate(pipeline))
 df = pd.DataFrame(results)
-
+print("Collection imported succesfully, DataFrame Generated")
 #Drop deadpooled companies
 
 df = df[df.deadpooled_year.isnull()]
@@ -59,17 +54,24 @@ def moneyRaise(value):
 
 df.total_money_raised = df.total_money_raised.apply(moneyRaise)
 
-#Dropping rows with null coordinates
-
 drop_rows = df[((df.latitude.isnull() == True) | (df.longitude.isnull() == True))].index
 df.drop(drop_rows, inplace=True)
+df.to_csv("../Input/clean_df_companies.csv")
+print("Cleaned DataFrame successfully exported to csv")
 
-df.to_csv("../output/master_dafaFrame.csv")
+#Importing airports geoDataFrame
 
-#Creating DataFrame with Tech companies, >$1m raised
-df_tech = df[(df["Tech/Other"] == "Tech") & (df["total_money_raised"] >= 1000000)]
-df_tech.to_csv("./output/tech_dafaFrame.csv")
+gdf_airports = gpd.read_file("../Input/ne_10m_airports/ne_10m_airports.shp")
+print("Airports shp file imported.")
 
-#Creating DataFrame with old companies < 2009
-df_old = df[df["founded_year"]<=2009]
-df_old.to_csv("./output/old_dafaFrame.csv")
+gdf_master = df_to_gdf(df)
+
+gdf_airports["geoJSON"] = gdf_airports.geometry.apply(lambda x: getLocation(x))
+gdf_airports = gdf_airports.loc[:,["name", "geometry", "geoJSON"]]
+
+#Exporting to JSON
+df_master = pd.DataFrame(gdf_master)
+df_airports = pd.DataFrame(gdf_airports)
+df_airports.drop(df_airports.columns[1], axis=1, inplace=True)
+df_airports.to_json("airports.json", orient='records')
+print("JSON file generated.")
