@@ -92,3 +92,9 @@ def searchNearWithoutLimit(longitude, latitude, collection, maxDistance):
          }
     )
     return list(result)
+
+
+def embed_map(m, file_name):
+    from IPython.display import IFrame
+    m.save(file_name)
+    return IFrame(file_name, width='100%', height='500px')

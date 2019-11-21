@@ -1,6 +1,8 @@
-
 import pandas as pd
-from functions import connectCollection, searchNear, searchNearWithoutLimit
+from functions import connectCollection, searchNear, searchNearWithoutLimit, embed_map
+import folium
+import folium
+from folium.plugins import HeatMap
 
 
 def main():
@@ -62,7 +64,36 @@ def main():
     df_austin = df_filtered[df_filtered.city == "Austin"]
     df_austin.reset_index(inplace=True, drop=True)
     df_austin.to_csv("../input/df_austin.csv")
-    df_austin.to_json("../input/df_austin.json", orient='records')
+
+    df_austin_final = df_austin.copy()
+
+    df_austin_final["Airport_Latitude"] = df_austin_final["Closest_Airport"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_austin_final["Airport_Longitude"] = df_austin_final["Closest_Airport"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+    df_austin_final["Starbucks_Latitude"] = df_austin_final["Closest_Starbucks"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_austin_final["Starbucks_Longitude"] = df_austin_final["Closest_Starbucks"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+    df_austin_final["TechCo_Latitude"] = df_austin_final["Closest_techCo"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_austin_final["TechCo_Longitude"] = df_austin_final["Closest_techCo"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+
+    # Create map with release incidents and monitoring stations
+    m = folium.Map(location=[30.288653, -97.822884], zoom_start=11)
+    HeatMap(data=df_austin_final[['latitude',
+                                  'longitude']], radius=50).add_to(m)
+    for idx, row in df_austin_final.iterrows():
+        folium.Marker([row['latitude'], row['longitude']],
+                      icon=folium.Icon(icon='home', color='blue')).add_to(m)
+        folium.Marker([row['Starbucks_Latitude'], row['Starbucks_Longitude']],
+                      icon=folium.Icon(icon='cutlery', color='darkgreen')).add_to(m)
+        folium.Marker([row['Airport_Latitude'], row['Airport_Longitude']],
+                      icon=folium.Icon(icon='plane', color='red')).add_to(m)
+
+    # Show the map
+    embed_map(m, 'm1.html')
 
 
 if __name__ == "__main__":
