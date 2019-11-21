@@ -5,15 +5,15 @@ import re
 
 
 def connectCollection(database, collection):
+    '''Connects to MongoDB'''
     client = MongoClient()
     db = client[database]
     coll = db[collection]
     return db, coll
 
-# Function for creating GeoJSON column, input must be GeoDataFrame (geopandas required)
-
 
 def getLocation(gdf):
+    '''Function for creating GeoJSON column, input must be GeoDataFrame (geopandas required)'''
     long = gdf.x
     lat = gdf.y
     loc = {
@@ -30,10 +30,9 @@ def getLoc(long, lat):
     }
     return loc
 
-# Convert df in geoDataFrame
-
 
 def df_to_gdf(dataframe):
+    '''Convert df in geoDataFrame'''
     gdf = gpd.GeoDataFrame(dataframe, geometry=gpd.points_from_xy(
         dataframe.longitude, dataframe.latitude))
     gdf.crs = {'init': 'epsg:4326'}
@@ -66,17 +65,16 @@ def moneyRaise(value):
         exchange = value_number
     return int(exchange)
 
-# Look for nearbyplaces
 
-
-def searchNear(latitude, longitude, collection, maxDistance):
+def searchNear(longitude, latitude, collection, maxDistance):
+    '''Look for nearbyplaces'''
     result = collection.find(
         {"geoJSON":
          {"$near":
-          {"$geometry": {"type": "Point",  "coordinates": [latitude, longitude]},
+          {"$geometry": {"type": "Point",  "coordinates": [longitude, latitude]},
            "$maxDistance": maxDistance,
            }
           }
          }
     ).limit(1)
-    return result if len(list(result)) > 0 else [0]
+    return result

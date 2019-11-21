@@ -3,7 +3,7 @@ import re
 import geopandas as gpd
 from functions import connectCollection, getLocation, df_to_gdf, moneyRaise
 
-# Import MongoDB collection and create DataFrame
+# Import MongoDB collection and create base cleaned DataFrame
 
 
 def main():
@@ -41,23 +41,8 @@ def main():
     df.drop(drop_rows, inplace=True)
 
     # Exporting DataFrame
-    df.to_csv("../Input/clean_df_companies.csv")
+    df.to_csv("../input/clean_df_companies.csv")
     print("Cleaned DataFrame successfully exported to csv")
-
-    # Importing airports geoDataFrame
-    gdf_airports = gpd.read_file(
-        "../Input/ne_10m_airports/ne_10m_airports.shp")
-    print("Airports shp file imported.")
-
-    gdf_airports["geoJSON"] = gdf_airports.geometry.apply(
-        lambda x: getLocation(x))
-    gdf_airports = gdf_airports.loc[:, ["name", "geometry", "geoJSON"]]
-
-    # Exporting airports to JSON
-    df_airports = pd.DataFrame(gdf_airports)
-    df_airports.drop(df_airports.columns[1], axis=1, inplace=True)
-    df_airports.to_json("airports.json", orient='records')
-    print("Airports JSON file generated.")
 
 
 if __name__ == "__main__":
