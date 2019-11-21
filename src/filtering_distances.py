@@ -44,27 +44,24 @@ def main():
     df_filtered.to_csv("../input/df_filtered")
     print("df_filtered.csv successfully exported")
 
-    # Selecting and filtering podium of cities
-    '''
-    Top3 of cities is London, Los Angeles and Austin. So we filter these three.
-    '''
-    df_podium = df_filtered[(df_filtered.city == "London") | (
-        df_filtered.city == "Los Angeles") | (df_filtered.city == "Austin")]
-    df_podium.reset_index(inplace=True, drop=True)
-    dropcol = df_podium.iloc[:, 0]
-    df_podium
-
-    # Filter to see distances to airports, Starbucks and number of successfull technology companies around.
-    df_podium["Coord_Closest_Airport"] = df_podium.Closest_Airport.apply(
-        lambda x: x[0]["geoJSON"]["coordinates"])
-    df_podium["Coord_Closest_Starbucks"] = df_podium.Closest_Starbucks.apply(
-        lambda x: x[0]["geoJSON"]["coordinates"])
-    df_podium["N_techCos_Around"] = df_podium.Closest_techCo.apply(
+    # Checking which cities have more techCos around
+    df_filtered["Number_of_TechCo_around"] = df_filtered.Closest_techCo.apply(
         lambda x: len(x))
-    df_austin = df_podium[df_podium.city == "Austin"]
+    df_check_techCos = df_filtered[["city", "Number_of_TechCo_around"]]
+    df_check_techCos = df_check_techCos.groupby("city").sum().sort_values(
+        by="Number_of_TechCo_around", ascending=False)
+
+    # Checking apartment rent prices
+    df_apartment = pd.read_csv("../input/apartment-rent-summary.csv")
+    df_apartment[df_apartment["Location"].str.contains(
+        "Atlanta|Chicago|Denver|Austin|San Mateo") == True].sort_values(by=["Price_3br"], ascending=False)
+    '''
+    Austin will be chosen, as it has many tech companies around, good rental prices and outranked Silicon Valley as the top city for startups
+    http://austin.culturemap.com/news/innovation/07-03-19-austin-ranking-best-cities-startups-commercialcafe/
+    '''
+    df_austin = df_filtered[df_filtered.city == "Austin"]
+    df_austin.reset_index(inplace=True, drop=True)
     df_austin.to_csv("../input/df_austin.csv")
-    # We see that Austin has 8 technology companies around, therefore we will choose this city.
-    print("df_austin.csv successfully exported")
 
 
 if __name__ == "__main__":

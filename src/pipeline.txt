@@ -1,8 +1,0 @@
-
-
-
-1) First, dataframe must be cleaned with clean.py
-2) Then, airports should be imported and imported into mongoDB
-3) Then, oldCos Dataframe should be generated
-4) Create oldCos collection
-5) Geoqueries to airports and oldcos, then filter dataframe
