@@ -77,4 +77,18 @@ def searchNear(longitude, latitude, collection, maxDistance):
           }
          }
     ).limit(1)
-    return result
+    return list(result)
+
+
+def searchNearWithoutLimit(longitude, latitude, collection, maxDistance):
+    '''Look for nearbyplaces'''
+    result = collection.find(
+        {"geoJSON":
+         {"$near":
+          {"$geometry": {"type": "Point",  "coordinates": [longitude, latitude]},
+           "$maxDistance": maxDistance,
+           }
+          }
+         }
+    )
+    return list(result)

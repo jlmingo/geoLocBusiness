@@ -13,5 +13,5 @@ def main():
     print("oldCos.json exported successfully")
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     main()
