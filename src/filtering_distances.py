@@ -62,6 +62,7 @@ def main():
     df_austin = df_filtered[df_filtered.city == "Austin"]
     df_austin.reset_index(inplace=True, drop=True)
     df_austin.to_csv("../input/df_austin.csv")
+    df_austin.to_json("../input/df_austin.json", orient='records')
 
 
 if __name__ == "__main__":
