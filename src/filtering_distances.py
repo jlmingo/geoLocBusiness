@@ -1,8 +1,14 @@
+
 import pandas as pd
+from functions import connectCollection, searchNear
+from clean import df
 
-#Import previously filtered dataFrame (see clean.py)
+#Import airports and querying them
 
-df_master = pd.read_csv("../output/master_dataFrame.csv")
-df_tech = pd.read_csv("../output/master_dataFrame.csv")
-df_old = pd.read_csv("../output/master_dataFrame.csv")
+db, coll = connectCollection('companies','airports')
 
+df["Closest_Airport"] = df.apply(lambda x: searchNear(x.longitude, x.latitude, coll, 20000), axis=1)
+df["Closest_Airport"] = df.Closest_Airport.apply(lambda x: list(x))
+df = df[df['Closest_Airport'].astype(bool)]
+
+#Import airports and querying them
