@@ -1,0 +1,10 @@
+.env
+src/__pycache__/
+.ipynb_checkpoints/
+notes/
+input/apartment-rent-summary.csv
+.vscode/
+/input/techCos.json
+/input/oldCos.json
+/input/companies.json
+/input/clean_df_companies.csv
