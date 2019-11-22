@@ -78,6 +78,9 @@ def main():
     df_austin_final["TechCo_Longitude"] = df_austin_final["Closest_techCo"].apply(
         lambda x: x[0]["geoJSON"]["coordinates"][0])
 
+    df_austin_final.to_csv("../input/df_austin_final.csv")
+    print("df_austin_final.csv successfully exported")
+
     # Austin map
     m = folium.Map(location=[30.288653, -97.822884], zoom_start=11)
     HeatMap(data=df_austin_final[['latitude',
@@ -108,21 +111,21 @@ def main():
     df_filtered["TechCo_Longitude"] = df_filtered["Closest_techCo"].apply(
         lambda x: x[0]["geoJSON"]["coordinates"][0])
 
-    df_filtered.to_csv("../input/df_filtered")
+    df_filtered.to_csv("../input/df_filtered.csv")
     print("df_filtered.csv successfully exported")
 
-    m_2 = folium.Map(location=[40.4893538, -3.6827461], zoom_start=2)
+    # m_2 = folium.Map(location=[40.4893538, -3.6827461], zoom_start=2)
 
-    mc = MarkerCluster()
-    for idx, row in df_filtered.iterrows():
-        if not math.isnan(row['longitude']) and not math.isnan(row['latitude']):
-            mc.add_child(folium.Marker([row['latitude'], row['longitude']]))
-    m_2.add_child(mc)
-    HeatMap(data=df_filtered[['TechCo_Latitude',
-                              'TechCo_Longitude']], radius=50).add_to(mc)
+    # mc = MarkerCluster()
+    # for idx, row in df_filtered.iterrows():
+    #     if not math.isnan(row['longitude']) and not math.isnan(row['latitude']):
+    #         mc.add_child(folium.Marker([row['latitude'], row['longitude']]))
+    # m_2.add_child(mc)
+    # HeatMap(data=df_filtered[['TechCo_Latitude',
+    #                           'TechCo_Longitude']], radius=50).add_to(mc)
 
-    embed_map(m_2, '../output/m_2.html')
-    print("Cluster and heatmap successfully exported")
+    # embed_map(m_2, '../output/m_2.html')
+    # print("Cluster and heatmap successfully exported")
 
 
 if __name__ == "__main__":
