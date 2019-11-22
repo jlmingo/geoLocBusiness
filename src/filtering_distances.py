@@ -1,8 +1,8 @@
 import pandas as pd
 from functions import connectCollection, searchNear, searchNearWithoutLimit, embed_map
 import folium
-import folium
-from folium.plugins import HeatMap
+from folium.plugins import HeatMap, MarkerCluster
+import math
 
 
 def main():
@@ -43,8 +43,6 @@ def main():
     df_filtered = df_filtered[df_filtered['Closest_techCo'].astype(
         bool)]
     df_filtered.reset_index(inplace=True, drop=True)
-    df_filtered.to_csv("../input/df_filtered")
-    print("df_filtered.csv successfully exported")
 
     # Checking which cities have more techCos around
     df_filtered["Number_of_TechCo_around"] = df_filtered.Closest_techCo.apply(
@@ -80,7 +78,7 @@ def main():
     df_austin_final["TechCo_Longitude"] = df_austin_final["Closest_techCo"].apply(
         lambda x: x[0]["geoJSON"]["coordinates"][0])
 
-    # Create map with release incidents and monitoring stations
+    # Austin map
     m = folium.Map(location=[30.288653, -97.822884], zoom_start=11)
     HeatMap(data=df_austin_final[['latitude',
                                   'longitude']], radius=50).add_to(m)
@@ -93,7 +91,38 @@ def main():
                       icon=folium.Icon(icon='plane', color='red')).add_to(m)
 
     # Show the map
-    embed_map(m, 'm1.html')
+    embed_map(m, '../output/m_1.html')
+    print("Austin successfully exported")
+
+    # Alternative Analysis
+    df_filtered["Airport_Latitude"] = df_filtered["Closest_Airport"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_filtered["Airport_Longitude"] = df_filtered["Closest_Airport"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+    df_filtered["Starbucks_Latitude"] = df_filtered["Closest_Starbucks"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_filtered["Starbucks_Longitude"] = df_filtered["Closest_Starbucks"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+    df_filtered["TechCo_Latitude"] = df_filtered["Closest_techCo"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][1])
+    df_filtered["TechCo_Longitude"] = df_filtered["Closest_techCo"].apply(
+        lambda x: x[0]["geoJSON"]["coordinates"][0])
+
+    df_filtered.to_csv("../input/df_filtered")
+    print("df_filtered.csv successfully exported")
+
+    m_2 = folium.Map(location=[40.4893538, -3.6827461], zoom_start=2)
+
+    mc = MarkerCluster()
+    for idx, row in df_filtered.iterrows():
+        if not math.isnan(row['longitude']) and not math.isnan(row['latitude']):
+            mc.add_child(folium.Marker([row['latitude'], row['longitude']]))
+    m_2.add_child(mc)
+    HeatMap(data=df_filtered[['TechCo_Latitude',
+                              'TechCo_Longitude']], radius=50).add_to(mc)
+
+    embed_map(m_2, '../output/m_2.html')
+    print("Cluster and heatmap successfully exported")
 
 
 if __name__ == "__main__":
